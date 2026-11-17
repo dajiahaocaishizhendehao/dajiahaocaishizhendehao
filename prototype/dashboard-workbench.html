@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>工作台重设计 · 原型</title>
+<style>
+:root{--navy:#0b1d3a;--blue:#2563eb;--ink:#172033;--muted:#667085;--line:#e5eaf2;--bg:#f4f7fb;--green:#13966a;--amber:#c77a08;--red:#c44754;--purple:#7659dc;--radius:14px}
+*{box-sizing:border-box}body{margin:0;font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;color:var(--ink);background:var(--bg);font-size:13px}button,input{font:inherit}button{cursor:pointer}.app{display:flex;min-height:100vh}.side{position:fixed;inset:0 auto 0 0;width:228px;padding:20px 14px;background:linear-gradient(180deg,var(--navy),#0a1730 72%);color:#d6e2f7;display:flex;flex-direction:column}.brand{display:flex;align-items:center;gap:11px;padding:0 8px 22px}.mark{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,#4388ff,#80b0ff);font-weight:800;color:#fff}.brand strong{display:block;font-size:16px;color:#fff}.brand small{font-size:9px;color:#7f9dc8;letter-spacing:.12em}.nav-group{margin:8px 0 12px}.nav-group>small{display:block;padding:0 12px 6px;color:#829dc4}.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;color:#aec0dc;margin:2px 0}.nav.active{background:rgba(54,121,242,.27);color:#fff}.nav i{width:18px;text-align:center;font-style:normal}.foot{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#7890b5}.main{margin-left:228px;width:calc(100% - 228px)}.top{height:64px;padding:0 28px;display:flex;justify-content:space-between;align-items:center;background:#fff;border-bottom:1px solid var(--line)}.crumb small{color:var(--muted)}.user{display:flex;align-items:center;gap:9px}.avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#edf3ff;color:#2e68c5;font-weight:700}.page{padding:24px 28px 42px;max-width:1500px;margin:auto}.intro{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:16px}.intro h1{font-size:24px;margin:0 0 5px}.intro p{margin:0;color:var(--muted)}.actions{display:flex;gap:8px}.btn{height:35px;border:1px solid var(--line);border-radius:9px;background:#fff;color:#344054;padding:0 13px}.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn.soft{background:#eef4ff;color:#275fae;border-color:#dbe8ff}.search{display:grid;grid-template-columns:1fr auto;gap:8px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px;margin-bottom:14px;box-shadow:0 3px 12px rgba(21,38,67,.03)}.search input{height:38px;border:0;outline:0;padding:0 10px;font-size:14px}.search-results{display:none;position:absolute;z-index:20;top:48px;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 16px 36px rgba(15,32,61,.15);overflow:hidden}.searchbox{position:relative}.result{display:flex;justify-content:space-between;gap:16px;padding:11px 13px;border-bottom:1px solid #f0f2f6}.result:hover{background:#f7faff}.result small{color:var(--muted)}.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}.metric{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 14px;display:flex;justify-content:space-between;align-items:center}.metric small{color:var(--muted)}.metric strong{display:block;font-size:22px;margin-top:4px}.metric i{font-style:normal;color:#fff;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#4c83e8}.metric:nth-child(2) i{background:#7659dc}.metric:nth-child(3) i{background:#d97706}.metric:nth-child(4) i{background:#13a16f}.metric:nth-child(5) i{background:#c44c59}.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.75fr);gap:14px}.stack{display:grid;gap:14px}.panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}.panel-head h2{font-size:15px;margin:0 0 4px}.panel-head p{font-size:11px;color:var(--muted);margin:0}.link{border:0;background:transparent;color:var(--blue);font-size:12px}.tabs{display:flex;gap:5px;margin-bottom:11px}.tab{border:1px solid var(--line);background:#fff;border-radius:18px;height:29px;padding:0 11px;color:var(--muted)}.tab.active{background:#edf3ff;border-color:#cfe0ff;color:#275fae}.todo{display:grid;grid-template-columns:84px minmax(0,1fr) 105px 82px;gap:12px;align-items:center;padding:11px 5px;border-bottom:1px solid #eef1f5}.todo:last-child{border-bottom:0}.date{font-variant-numeric:tabular-nums}.date strong{display:block;font-size:12px}.date small{color:var(--red)}.name strong{display:block;font-size:13px;margin-bottom:3px}.name small{color:var(--muted)}.badge{display:inline-flex;align-items:center;height:22px;border-radius:12px;padding:0 8px;font-size:11px;background:#eef3ff;color:#2e68c5}.badge.amber{background:#fff5df;color:#a9680c}.badge.red{background:#fff0f1;color:#bd4653}.badge.green{background:#e8f7f1;color:#16865a}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.quick button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:13px 9px;text-align:left}.quick button:hover{border-color:#9fbdf8;background:#f8fbff}.quick b{display:block;margin-bottom:4px}.quick small{color:var(--muted)}.alert{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #eef1f5}.alert:last-child{border-bottom:0}.alert .ico{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#fff3e8;color:#b96a09}.alert b{display:block;font-size:12px;margin-bottom:3px}.alert small{color:var(--muted)}.recent{padding:9px 0;border-bottom:1px solid #eef1f5}.recent:last-child{border:0}.recent strong{display:block;font-size:12px;margin-bottom:3px}.recent small{color:var(--muted)}.empty{color:var(--muted);padding:28px;text-align:center}.prototype{position:fixed;right:20px;bottom:18px;background:#fff8e8;color:#9b650f;border:1px solid #f2d79f;border-radius:18px;padding:8px 12px;font-size:11px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="brand"><div class="mark">IP</div><div><strong>知产云档</strong><small>IP ASSET CENTER</small></div></div>
+  <div class="nav-group"><small>总览</small><div class="nav active"><i>⌂</i>工作台</div></div>
+  <div class="nav-group"><small>知识产权</small><div class="nav"><i>◇</i>全部知识产权</div><div class="nav"><i>TM</i>商标 / Logo</div></div>
+  <div class="nav-group"><small>档案管理</small><div class="nav"><i>▤</i>材料中心</div><div class="nav"><i>◷</i>日期台账</div></div>
+  <div class="nav-group"><small>财务</small><div class="nav"><i>¥</i>费用台账</div></div>
+  <div class="foot">原型数据均为虚构示例<br/>不代表真实业务记录</div>
+</aside>
+<main class="main">
+<header class="top"><div class="crumb"><small>知识产权管理系统　›　</small><b>工作台</b></div><div class="user"><span>2026-11-07</span><div class="avatar">管</div></div></header>
+<div class="page">
+  <section class="intro"><div><h1>下午好，管理员</h1><p>这里集中展示需要处理的事项，而不是只展示统计数字。</p></div><div class="actions"><button class="btn">＋ 新建案件</button><button class="btn">⇧ 上传材料</button><button class="btn primary">¥ 登记费用</button></div></section>
+
+  <section class="search"><div class="searchbox"><input id="globalSearch" placeholder="搜索案件名称、我方文号、申请号…" autocomplete="off"><div class="search-results" id="results"><div class="result"><div><b>一种图像增强方法（虚构示例）</b><br><small>专利 · 我方文号 DEMO-PAT-001</small></div><span class="badge">查看案件</span></div><div class="result"><div><b>算力资源调度软件 V1.0（虚构示例）</b><br><small>软著 · DEMO-SW-003</small></div><span class="badge">查看案件</span></div></div></div><button class="btn soft">搜索</button></section>
+
+  <section class="metrics">
+    <div class="metric"><div><small>全部档案</small><strong>23</strong></div><i>IP</i></div>
+    <div class="metric"><div><small>办理中</small><strong>8</strong></div><i>…</i></div>
+    <div class="metric"><div><small>待处理日期</small><strong>4</strong></div><i>◷</i></div>
+    <div class="metric"><div><small>缺少发票费用</small><strong>7</strong></div><i>¥</i></div>
+    <div class="metric"><div><small>识别待确认</small><strong>2</strong></div><i>!</i></div>
+  </section>
+
+  <section class="layout">
+    <div class="stack">
+      <article class="panel">
+        <div class="panel-head"><div><h2>待处理事项</h2><p>只展示人工录入、尚未完成的日期，不自动推算法定期限</p></div><button class="link">查看日期台账 →</button></div>
+        <div class="tabs"><button class="tab active" data-filter="all">全部 4</button><button class="tab" data-filter="7">7 天内 2</button><button class="tab" data-filter="overdue">已逾期 1</button></div>
+        <div id="todos">
+          <div class="todo" data-kind="overdue"><div class="date"><strong>2026-11-05</strong><small>逾期 2 天</small></div><div class="name"><strong>答复材料内部确认（虚构示例）</strong><small>一种服务器散热装置 · DEMO-PAT-008</small></div><span class="badge red">截止日期</span><button class="btn">处理</button></div>
+          <div class="todo" data-kind="7"><div class="date"><strong>2026-11-10</strong><small style="color:#a9680c">剩余 3 天</small></div><div class="name"><strong>代理文件复核（虚构示例）</strong><small>算力调度方法 · DEMO-PAT-012</small></div><span class="badge amber">计划日期</span><button class="btn">处理</button></div>
+          <div class="todo" data-kind="7"><div class="date"><strong>2026-11-13</strong><small style="color:#a9680c">剩余 6 天</small></div><div class="name"><strong>软著材料补充（虚构示例）</strong><small>资源管理平台 V2.0 · DEMO-SW-005</small></div><span class="badge amber">自定义</span><button class="btn">处理</button></div>
+          <div class="todo" data-kind="later"><div class="date"><strong>2026-11-25</strong><small style="color:#667085">剩余 18 天</small></div><div class="name"><strong>年费付款复核（虚构示例）</strong><small>图像识别方法 · DEMO-PAT-002</small></div><span class="badge">费用日期</span><button class="btn">处理</button></div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head"><div><h2>费用与发票待对账</h2><p>先产生费用，收到发票后从费用详情登记</p></div><button class="link">查看费用台账 →</button></div>
+        <div class="todo"><div class="date"><strong>¥1,200.00</strong><small style="color:#667085">已支付</small></div><div class="name"><strong>一种图像增强方法（虚构示例）</strong><small>年费 · 2026-10-28 缴纳</small></div><span class="badge amber">未登记发票</span><button class="btn">登记发票</button></div>
+        <div class="todo"><div class="date"><strong>¥800.00</strong><small style="color:#667085">已支付</small></div><div class="name"><strong>资源管理平台 V2.0（虚构示例）</strong><small>代理费 · 2026-11-02 缴纳</small></div><span class="badge amber">未登记发票</span><button class="btn">登记发票</button></div>
+      </article>
+    </div>
+
+    <aside class="stack">
+      <article class="panel"><div class="panel-head"><div><h2>快捷操作</h2><p>只保留高频动作</p></div></div><div class="quick"><button><b>新建案件</b><small>专利 / 软著 / 商标</small></button><button><b>上传材料</b><small>按案件关联文件</small></button><button><b>登记费用</b><small>应付与实付分开</small></button></div></article>
+
+      <article class="panel"><div class="panel-head"><div><h2>材料处理</h2><p>OCR 结果必须人工确认</p></div><button class="link">材料中心 →</button></div>
+        <div class="alert"><div class="ico">!</div><div><b>1 份证书扫描件待确认</b><small>已识别字段，等待人工写入档案</small></div></div>
+        <div class="alert"><div class="ico" style="background:#fff0f1;color:#bd4653">×</div><div><b>1 份附件识别失败</b><small>原文件已保留，可重新识别</small></div></div>
+      </article>
+
+      <article class="panel"><div class="panel-head"><div><h2>最近更新案件</h2><p>最近修改的档案</p></div><button class="link">全部档案 →</button></div>
+        <div class="recent"><strong>一种液冷散热装置（虚构示例）</strong><small>专利 · 10 分钟前更新</small></div>
+        <div class="recent"><strong>资源管理平台 V2.0（虚构示例）</strong><small>软著 · 今天 14:30 更新</small></div>
+        <div class="recent"><strong>NOVA GRID 图形商标（虚构示例）</strong><small>商标 · 昨天更新</small></div>
+      </article>
+    </aside>
+  </section>
+</div>
+</main>
+</div>
+<div class="prototype">原型演示 · 所有数据均为虚构示例</div>
+<script>
+const input=document.getElementById('globalSearch'),results=document.getElementById('results');
+input.addEventListener('input',()=>{results.style.display=input.value.trim()?'block':'none'});input.addEventListener('focus',()=>{if(input.value.trim())results.style.display='block'});document.addEventListener('click',e=>{if(!e.target.closest('.searchbox'))results.style.display='none'});
+document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));tab.classList.add('active');const f=tab.dataset.filter;document.querySelectorAll('.todo[data-kind]').forEach(row=>{row.style.display=f==='all'||row.dataset.kind===f?'grid':'none'})}));
+document.querySelectorAll('.btn,.link,.quick button,.result').forEach(x=>x.addEventListener('click',e=>{if(e.target.closest('.tab'))return;const old=document.querySelector('.prototype').textContent;document.querySelector('.prototype').textContent='原型交互演示：'+x.textContent.trim().slice(0,24);setTimeout(()=>document.querySelector('.prototype').textContent=old,1800)}));
+</script>
+</body>
+</html>

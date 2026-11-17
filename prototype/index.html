@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <meta name="description" content="知识产权管理系统可点击原型" />
+  <title>知产云档 · 原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#page">跳到主要内容</a>
+  <div class="prototype-ribbon">交互原型 · 页面数据均为虚构示例</div>
+  <div id="app" class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="主导航">
+      <div class="brand">
+        <div class="brand-mark">IP</div>
+        <div class="brand-copy"><strong>知产云档</strong><span>IP Asset Center</span></div>
+        
+      </div>
+      <nav id="mainNav"></nav>
+      <div class="sidebar-footer">
+        <div class="storage-row"><span>档案存储</span><strong>68%</strong></div>
+        <div class="progress"><i style="width:68%"></i></div>
+        <small>演示空间 34.2 GB / 50 GB</small>
+      </div>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          
+          <div class="breadcrumb" id="breadcrumb"></div>
+        </div>
+        <div class="topbar-actions">
+          <label class="global-search"><span>⌕</span><input id="globalSearch" placeholder="搜索名称、编号或权利人" /><kbd>⌘ K</kbd></label>
+          <button class="icon-button notification" data-action="toast" data-message="当前有 4 条待处理提醒" aria-label="消息提醒">♢<b>4</b></button>
+          <button class="profile-button" data-action="toast" data-message="个人中心将在开发阶段接入">
+            <span class="avatar">林</span><span class="profile-copy"><strong>林知远</strong><small>知识产权管理员</small></span><span>⌄</span>
+          </button>
+        </div>
+      </header>
+      <main id="page" tabindex="-1"></main>
+    </div>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+  <aside class="drawer" id="drawer" aria-hidden="true" aria-label="快捷操作">
+    <header><div><small id="drawerEyebrow">快捷登记</small><h2 id="drawerTitle">新建记录</h2></div><button class="icon-button" id="drawerClose" aria-label="关闭">×</button></header>
+    <div class="drawer-body" id="drawerBody"></div>
+    <footer><button class="button ghost" id="drawerCancel">取消</button><button class="button primary" id="drawerSubmit">保存示例</button></footer>
+  </aside>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden></div>
+  <section class="modal" id="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
+    <header><div><small>档案预览</small><h2 id="modalTitle">材料文件</h2></div><button class="icon-button" id="modalClose" aria-label="关闭">×</button></header>
+    <div class="modal-body" id="modalBody"></div>
+  </section>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

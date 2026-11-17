@@ -1,0 +1,23 @@
+# EasyOCR 可选依赖（CPU 版）。
+#
+# 当前服务器 CPU 不支持 AVX2/FBGEMM，必须使用 CPU 版 PyTorch，
+# 并在 EasyOCR Reader 中设置 quantize=False，否则量化 LSTM 会触发
+# Illegal instruction。模型文件放在 /opt/ipms/.EasyOCR/model。
+#
+# 安装：
+#   runuser -u ipms -- /opt/ipms/venv/bin/pip install -r backend/requirements-ocr.txt
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://repo.huaweicloud.com/repository/pypi/simple
+
+torch==2.5.1+cpu
+torchvision==0.20.1+cpu
+numpy==1.26.4
+scipy==1.13.1
+scikit-image==0.24.0
+opencv-python-headless==4.11.0.86
+shapely==2.2.0
+pyclipper==1.4.0
+python-bidi==0.6.12
+ninja==1.13.2
+easyocr==1.7.2

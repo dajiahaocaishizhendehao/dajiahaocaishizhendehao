@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>识别结果确认 · 原型</title>
+<style>
+  :root{--blue:#2563eb;--ink:#172033;--muted:#5f6b80;--line:#e5eaf2;--bg:#f4f7fb;--green:#12a66a;--amber:#d97706;--red:#dc5562;--panel:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;background:#0b1d3a;color:var(--ink)}
+  .stage{min-height:100vh;display:grid;place-items:center;padding:24px}
+  .modal{width:1220px;max-width:100%;height:760px;background:var(--panel);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden}
+  header{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px;border-bottom:1px solid var(--line)}
+  header h1{font-size:18px;margin:0 0 6px}
+  .meta{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:12px;font-size:11px;background:#eef3ff;color:#2e68c5}
+  .pill.green{background:#e8f7f1;color:#16865a}
+  .pill.amber{background:#fff5df;color:#b97511}
+  .pill.gray{background:#eff2f5;color:#687386}
+  .close{border:0;background:transparent;font-size:20px;color:var(--muted);cursor:pointer}
+  .body{display:grid;grid-template-columns:420px 1fr;flex:1;min-height:0}
+  /* 左：原件预览 */
+  .preview{border-right:1px solid var(--line);display:flex;flex-direction:column;background:#eef2f7;min-height:0}
+  .preview-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+  .preview-bar .spacer{flex:1}
+  .iconbtn{width:28px;height:28px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;color:#475269}
+  .sheet-wrap{flex:1;overflow:auto;padding:18px;display:grid;place-items:start center}
+  .sheet{width:330px;background:#fff;box-shadow:0 6px 24px rgba(25,45,76,.16);padding:26px 22px;font-size:9px;line-height:1.9;color:#8b95a6;position:relative}
+  .sheet:before{content:"示例扫描件";position:absolute;inset:0;display:grid;place-items:center;font-size:34px;color:rgba(37,99,235,.08);transform:rotate(-24deg);font-weight:700;pointer-events:none}
+  .sheet h3{text-align:center;font-size:12px;color:#4b5568;margin:0 0 12px;letter-spacing:2px}
+  .sheet hr{border:0;border-top:1px solid #e6eaf0;margin:10px 0}
+  .ocr{margin-top:10px;border-top:1px solid var(--line);background:#fff}
+  .ocr summary{padding:10px 12px;font-size:12px;color:var(--blue);cursor:pointer}
+  .ocr pre{margin:0;padding:0 12px 12px;font-size:11px;color:var(--muted);white-space:pre-wrap;max-height:120px;overflow:auto}
+  /* 右：字段确认 */
+  .fields{display:flex;flex-direction:column;min-height:0}
+  .toolbar{display:flex;gap:8px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--line);background:#fbfcfe;font-size:12px;color:var(--muted)}
+  .toolbar .spacer{flex:1}
+  .tbtn{border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer;color:#344054}
+  .tbtn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  .table-wrap{flex:1;overflow:auto}
+  table{width:100%;border-collapse:collapse}
+  th{position:sticky;top:0;background:#fff;text-align:left;font-size:11px;color:#778298;font-weight:600;padding:10px 14px;border-bottom:1px solid var(--line);z-index:1}
+  td{padding:10px 14px;border-bottom:1px solid #f0f2f6;font-size:13px;vertical-align:middle}
+  tr:hover td{background:#fafcff}
+  .field-name{color:#475269;font-size:12px;white-space:nowrap}
+  .current{color:var(--muted);font-size:12px;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .current.empty{color:#b6becb;font-style:italic}
+  input[type="text"],input[type="date"]{width:100%;max-width:240px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:13px;color:var(--ink);background:#fff}
+  input:focus{outline:none;border-color:#7aa2ef;box-shadow:0 0 0 3px #edf3ff}
+  input[readonly]{background:#f7f9fc;color:var(--muted)}
+  .toggle{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+  .tag{font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap}
+  .tag.new{background:#e8f7f1;color:#16865a}
+  .tag.overwrite{background:#fff5df;color:#b97511}
+  .tag.same{background:#eff2f5;color:#687386}
+  .tag.none{background:#fff0f1;color:#c44451}
+  .warn{margin:12px 22px 0;background:#fff9ec;border:1px solid #fae4b7;border-radius:10px;padding:10px 12px;font-size:12px;color:#8b6b36}
+  footer{display:flex;align-items:center;gap:12px;padding:14px 22px;border-top:1px solid var(--line);background:#fff}
+  .summary{font-size:12px;color:var(--muted)}
+  .summary b{color:var(--ink)}
+  footer .spacer{flex:1}
+  .btn{height:38px;padding:0 16px;border-radius:9px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;color:#344054}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 6px 15px rgba(37,99,235,.22)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .legend{display:flex;gap:14px;padding:8px 22px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--line);background:#fbfcfe}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+</style>
+</head>
+<body>
+<div class="stage">
+  <section class="modal" aria-label="识别结果确认">
+    <header>
+      <div>
+        <h1>确认识别结果并写入档案</h1>
+        <div class="meta">
+          <span>一种眼底图像对比度增强方法</span>
+          <span class="pill">OCR 识别 · 25.7 秒</span>
+          <span class="pill gray">来源：专利登记簿副本.pdf</span>
+          <span class="pill amber">2 项需人工判断</span>
+        </div>
+      </div>
+      <button class="close" title="关闭">×</button>
+    </header>
+
+    <div class="body">
+      <!-- 左：原件 -->
+      <div class="preview">
+        <div class="preview-bar">
+          <button class="iconbtn" title="缩小">−</button>
+          <span>100%</span>
+          <button class="iconbtn" title="放大">+</button>
+          <span class="spacer"></span>
+          <span>第 1 / 1 页</span>
+          <button class="iconbtn" title="在新标签打开原件">⤢</button>
+        </div>
+        <div class="sheet-wrap">
+          <div class="sheet">
+            <h3>专利登记簿副本</h3>
+            <div>专利号：201510859494.3</div>
+            <div>证书号：2775265</div>
+            <hr />
+            <div>名　称：一种眼底图像对比度增强方法</div>
+            <div>申请日：2015 年 11 月 27 日</div>
+            <div>分　类：G06T 5/00(2006.01)</div>
+            <div>发明人：肖志涛、张欣鹏、耿磊、张芳、吴骏</div>
+            <div>专利权人：思腾合力（天津）科技有限公司</div>
+            <div>法律状态：专利权有效</div>
+            <div>授权公告日：2018 年 01 月 12 日</div>
+          </div>
+        </div>
+        <details class="ocr">
+          <summary>查看识别原文（40 行）</summary>
+          <pre>国家知识产权局
+专利登记簿副本
+专利号:U201510859494.3
+证书号:2775265
+名  称: 一种眼底图像对比度增强方法
+…</pre>
+        </details>
+      </div>
+
+      <!-- 右：字段确认 -->
+      <div class="fields">
+        <div class="toolbar">
+          <button class="tbtn" data-bulk="all">全部写入</button>
+          <button class="tbtn" data-bulk="empty">只填空白项</button>
+          <button class="tbtn" data-bulk="none">全部取消</button>
+          <span class="spacer"></span>
+          <button class="tbtn">重新识别</button>
+        </div>
+        <div class="legend">
+          <span><i class="dot" style="background:#12a66a"></i>新增字段</span>
+          <span><i class="dot" style="background:#d97706"></i>将覆盖现有值</span>
+          <span><i class="dot" style="background:#b6becb"></i>与档案一致，无需写入</span>
+        </div>
+
+        <div class="warn">
+          专利权人识别为「思腾合力（天津）科技有限公司」，与档案中已有权利人不同，请确认后再勾选。
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:52px">写入</th>
+                <th style="width:150px">字段</th>
+                <th style="width:210px">档案当前值</th>
+                <th>识别结果（可修改）</th>
+                <th style="width:92px">状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-state="same">
+                <td><input class="toggle" type="checkbox" disabled /></td>
+                <td class="field-name">案件名称</td>
+                <td class="current">一种眼底图像对比度增强方法</td>
+                <td><input type="text" value="一种眼底图像对比度增强方法" readonly /></td>
+                <td><span class="tag same">一致</span></td>
+              </tr>
+              <tr data-state="new">
+                <td><input class="toggle" type="checkbox" checked /></td>
+                <td class="field-name">专利号</td>
+                <td class="current empty">未填写</td>
+                <td><input type="text" value="201510859494.3" /></td>
+                <td><span class="tag new">新增</span></td>
+              </tr>
+              <tr data-state="same">
+                <td><input class="toggle" type="checkbox" disabled /></td>
+                <td class="field-name">申请号</td>
+                <td class="current">2015108594943</td>
+                <td><input type="text" value="2015108594943" readonly /></td>
+                <td><span class="tag same">一致</span></td>
+              </tr>
+              <tr data-state="same">
+                <td><input class="toggle" type="checkbox" disabled /></td>
+                <td class="field-name">申请日</td>
+                <td class="current">2015-11-27</td>
+                <td><input type="date" value="2015-11-27" readonly /></td>
+                <td><span class="tag same">一致</span></td>
+              </tr>
+              <tr data-state="new">
+                <td><input class="toggle" type="checkbox" checked /></td>
+                <td class="field-name">授权公告日</td>
+                <td class="current empty">未填写</td>
+                <td><input type="date" value="2018-01-12" /></td>
+                <td><span class="tag new">新增</span></td>
+              </tr>
+              <tr data-state="new">
+                <td><input class="toggle" type="checkbox" checked /></td>
+                <td class="field-name">法律状态</td>
+                <td class="current empty">未填写</td>
+                <td><input type="text" value="专利权有效" /></td>
+                <td><span class="tag new">新增</span></td>
+              </tr>
+              <tr data-state="new">
+                <td><input class="toggle" type="checkbox" checked /></td>
+                <td class="field-name">专利权人</td>
+                <td class="current empty">未填写</td>
+                <td><input type="text" value="思腾合力（天津）科技有限公司" /></td>
+                <td><span class="tag new">新增</span></td>
+              </tr>
+              <tr data-state="readonly">
+                <td><input class="toggle" type="checkbox" disabled /></td>
+                <td class="field-name">证书号</td>
+                <td class="current empty">—</td>
+                <td><input type="text" value="2775265" readonly /></td>
+                <td><span class="tag same">仅展示</span></td>
+              </tr>
+              <tr data-state="readonly">
+                <td><input class="toggle" type="checkbox" disabled /></td>
+                <td class="field-name">发明人</td>
+                <td class="current empty">—</td>
+                <td><input type="text" value="肖志涛、张欣鹏、耿磊、张芳、吴骏" readonly /></td>
+                <td><span class="tag same">仅展示</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <footer>
+          <span class="summary" id="summary">将写入 <b>4</b> 项，跳过 <b>5</b> 项</span>
+          <span class="spacer"></span>
+          <button class="btn">取消</button>
+          <button class="btn primary" id="apply">写入档案</button>
+        </footer>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  const rows = () => [...document.querySelectorAll('tbody tr')]
+  const toggles = () => rows().map(r => r.querySelector('.toggle')).filter(t => t && !t.disabled)
+
+  function refresh() {
+    const on = toggles().filter(t => t.checked).length
+    const total = toggles().length
+    document.getElementById('summary').innerHTML =
+      `将写入 <b>${on}</b> 项，跳过 <b>${total - on + 3}</b> 项`
+  }
+
+  document.querySelectorAll('[data-bulk]').forEach(btn => {
+    btn.onclick = () => {
+      const mode = btn.dataset.bulk
+      toggles().forEach(t => {
+        const row = t.closest('tr')
+        if (mode === 'all') t.checked = true
+        else if (mode === 'none') t.checked = false
+        else t.checked = row.dataset.state === 'new'
+      })
+      refresh()
+    }
+  })
+
+  document.querySelectorAll('.toggle').forEach(t => t.addEventListener('change', refresh))
+  document.getElementById('apply').onclick = () => {
+    const on = toggles().filter(t => t.checked).length
+    alert(`原型演示：将写入 ${on} 个字段（不会保存任何数据）`)
+  }
+  refresh()
+</script>
+</body>
+</html>

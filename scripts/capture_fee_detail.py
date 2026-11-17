@@ -1,0 +1,101 @@
+"""截取费用详情抽屉（含关联发票）。
+
+    python scripts/capture_fee_detail.py --out docs/screenshot-fee-detail.png
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import pathlib
+import subprocess
+import sys
+import time
+import uuid
+
+SCRIPTS = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPTS))
+
+from cdp_login_check import CDP, find_edge, free_port, wait_target  # noqa: E402
+
+LOGIN = (
+    "(()=>{const s=(q,v)=>{const e=document.querySelector(q);"
+    "if(!e)return false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));return true};"
+    "s('#username','admin');s('#password','Admin@12345');"
+    "document.querySelector('form.login-card button').click();return 'ok'})()"
+)
+
+OPEN_DETAIL = (
+    "(()=>{const cells=[...document.querySelectorAll('tbody tr td:last-child button')];"
+    "const b=cells.find(x=>x.textContent.includes('张'));const target=b||cells[0];"
+    "if(!target)return 'none';target.click();return 'clicked'})()"
+)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="截取费用详情抽屉")
+    parser.add_argument("--out", default="docs/screenshot-fee-detail.png")
+    parser.add_argument("--base", default="http://127.0.0.1:5173")
+    args = parser.parse_args()
+
+    edge = find_edge()
+    if edge is None:
+        print("未找到 Edge")
+        return 1
+
+    work = pathlib.Path(__file__).resolve().parent.parent / "backend" / "var" / f"fee-{uuid.uuid4().hex[:6]}"
+    work.mkdir(parents=True, exist_ok=True)
+    port = free_port()
+    browser = subprocess.Popen(
+        [edge, "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
+         "--disable-sync", "--disable-extensions", f"--user-data-dir={work/'p'}",
+         f"--remote-debugging-port={port}", "--window-size=1440,980", "about:blank"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+    cdp = None
+    try:
+        target = wait_target(port)
+        cdp = CDP(target["webSocketDebuggerUrl"])
+        cdp.call("Runtime.enable")
+        cdp.call("Page.enable")
+        cdp.call("Emulation.setDeviceMetricsOverride",
+                 {"width": 1440, "height": 980, "deviceScaleFactor": 1, "mobile": False})
+        cdp.call("Page.navigate", {"url": f"{args.base}/#/login"})
+        time.sleep(2)
+        cdp.evaluate(LOGIN)
+        time.sleep(2)
+        cdp.evaluate("location.hash='#/fees'")
+        time.sleep(3)
+        print("打开费用详情：", cdp.evaluate(OPEN_DETAIL))
+        time.sleep(1.5)
+        print("抽屉存在：", cdp.evaluate("document.body.innerText.includes('关联发票')"))
+        shot = cdp.call("Page.captureScreenshot", {"format": "png", "captureBeyondViewport": False})
+        out = pathlib.Path(args.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(base64.b64decode(shot["data"]))
+        print(f"已保存：{out}（{out.stat().st_size} 字节）")
+        return 0
+    finally:
+        if cdp:
+            cdp.close()
+        browser.terminate()
+        try:
+            browser.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            browser.kill()
+        for path in sorted(work.rglob("*"), reverse=True):
+            try:
+                if path.is_file():
+                    path.unlink()
+                elif path.is_dir():
+                    path.rmdir()
+            except OSError:
+                pass
+        try:
+            work.rmdir()
+        except OSError:
+            pass
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

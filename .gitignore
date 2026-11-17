@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.env
+
+# 本地数据与文件
+backend/var/
+*.db
+*.sqlite3
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# 前端编译检查沙箱（从本机已有依赖复制而来，不入库）
+frontend/.sfc/
+
+# 临时文件
+.edge-*/
+*.log

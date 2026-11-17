@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <meta name="description" content="基础资料页面优化原型：权利人、人员、代理机构、项目 / 产品" />
+  <title>基础资料 · 优化原型</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .master-panel{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(28,50,85,.035)}
+    .master-panel .tabs{border-radius:0;border-bottom:1px solid var(--line);padding:0 16px}
+    .master-panel .tab-button{padding:16px 13px;font-size:12px}
+    .tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;margin-left:5px;padding:0 5px;border-radius:9px;background:#eef2f7;color:#6a768a;font-size:9px;font-weight:600}
+    .tab-button.active .tab-count{background:#e7efff;color:var(--blue)}
+    .master-toolbar{margin:0;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:13px 16px}
+    .master-toolbar .field{height:34px}
+    .master-toolbar .field.search{min-width:250px;width:250px}
+    .toolbar-right{display:flex;align-items:center;gap:10px;white-space:nowrap}
+    .result-count{font-size:11px;color:var(--muted)}
+    .master-panel .data-table th{padding:11px 14px}
+    .master-panel .data-table td{padding:13px 14px}
+    .master-panel .pagination{border-top:1px solid var(--line)}
+    .link-button.danger-link{color:#c44451}
+    .link-button.danger-link:hover{color:#a92c38}
+    .link-button:disabled{color:#b5bdc9;cursor:not-allowed}
+    .row-actions{gap:6px}
+    .action-btn{height:26px;padding:0 9px;border:1px solid #dce4ef;border-radius:6px;background:#fff;color:#315f9f;font-size:10px;font-weight:500;line-height:1}
+    .action-btn:hover{border-color:#9fbdf8;background:#f6f9ff;color:var(--blue)}
+    .action-btn.danger{color:#c44451}
+    .action-btn.danger:hover{border-color:#f3b8bf;background:#fff5f6;color:#a92c38}
+    .action-btn:disabled{color:#b5bdc9;border-color:#e7ebf2;background:#fbfcfd;cursor:not-allowed}
+    .sync-note{display:flex;align-items:center;gap:11px;padding:11px 16px;background:#f6f9ff;border-bottom:1px solid #e3ebf9;color:#3e4c63}
+    .sync-icon{width:28px;height:28px;border-radius:8px;background:#e7efff;color:var(--blue);display:grid;place-items:center;font-size:15px;flex:none}
+    .sync-note div{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;flex:1}
+    .sync-note strong{font-size:11px}
+    .sync-note span{font-size:10px;color:var(--muted)}
+    .sync-note .link-button{font-size:10px;padding:0}
+    .proto-note{margin:14px 2px 0;font-size:10px;color:#7b879b;line-height:1.7}
+    .proto-note b{color:#53627a;font-weight:600}
+    .empty-row td{text-align:center;color:var(--muted);padding:48px 14px!important}
+    .delete-modal{width:470px}
+    .delete-modal .modal-body{padding:24px}
+    .delete-copy{font-size:12px;line-height:1.8;color:#48566c;margin:0 0 12px}
+    .delete-copy strong{color:var(--ink)}
+    .delete-hint{margin:0;padding:10px 12px;border-radius:8px;background:#f7f9fc;color:var(--muted);font-size:10px;line-height:1.7}
+    .delete-modal footer{display:flex;justify-content:flex-end;gap:9px;padding:0 24px 24px}
+    .form-note{grid-column:1/-1;padding:10px 12px;border-radius:8px;background:#f6f9ff;color:#5f6b80;font-size:10px;line-height:1.7}
+    .checkbox-row{display:flex;align-items:center;gap:8px;font-size:11px;color:#475269}
+    .drawer .form-grid{gap:14px}
+    .drawer .form-group input[disabled],.drawer .form-group select[disabled]{background:#f6f8fb;color:#8793a7;cursor:not-allowed}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#page">跳到主要内容</a>
+  <div class="prototype-ribbon">交互原型 · 页面数据均为虚构示例</div>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand">
+        <div class="brand-mark">IP</div>
+        <div class="brand-copy"><strong>知产云档</strong><span>IP Asset Center</span></div>
+      </div>
+      <nav>
+        <div class="nav-section">
+          <span class="nav-label">总览</span>
+          <button class="nav-item"><span class="nav-icon">⌂</span><span>工作台</span></button>
+        </div>
+        <div class="nav-section">
+          <span class="nav-label">知识产权</span>
+          <button class="nav-item"><span class="nav-icon">◇</span><span>全部知识产权</span></button>
+          <button class="nav-item"><span class="nav-icon">P</span><span>专利档案</span></button>
+          <button class="nav-item"><span class="nav-icon">S</span><span>软著档案</span></button>
+          <button class="nav-item"><span class="nav-icon">TM</span><span>商标 / Logo</span></button>
+        </div>
+        <div class="nav-section">
+          <span class="nav-label">档案管理</span>
+          <button class="nav-item"><span class="nav-icon">▤</span><span>材料中心</span></button>
+          <button class="nav-item"><span class="nav-icon">◷</span><span>日期台账</span><span class="nav-count">4</span></button>
+          <button class="nav-item"><span class="nav-icon">□</span><span>提醒日历</span></button>
+        </div>
+        <div class="nav-section">
+          <span class="nav-label">财务与分析</span>
+          <button class="nav-item"><span class="nav-icon">¥</span><span>费用台账</span></button>
+          <button class="nav-item"><span class="nav-icon">⌑</span><span>发票管理</span></button>
+          <button class="nav-item"><span class="nav-icon">◒</span><span>统计分析</span></button>
+        </div>
+        <div class="nav-section">
+          <span class="nav-label">配置</span>
+          <button class="nav-item active"><span class="nav-icon">◎</span><span>基础资料</span></button>
+          <button class="nav-item"><span class="nav-icon">⚙</span><span>系统管理</span></button>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="storage-row"><span>档案存储</span><strong>68%</strong></div>
+        <div class="progress"><i style="width:68%"></i></div>
+        <small>演示空间 34.2 GB / 50 GB</small>
+      </div>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="breadcrumb"><small>配置</small><span>/</span><strong>基础资料</strong></div>
+        </div>
+        <div class="topbar-actions">
+          <label class="global-search"><span>⌕</span><input placeholder="搜索名称、编号或权利人" /><kbd>⌘ K</kbd></label>
+          <button class="icon-button notification" aria-label="消息提醒">♢<b>4</b></button>
+          <button class="profile-button">
+            <span class="avatar">林</span><span class="profile-copy"><strong>林知远</strong><small>知识产权管理员</small></span><span>⌄</span>
+          </button>
+        </div>
+      </header>
+
+      <main id="page" tabindex="-1">
+        <div class="page-head">
+          <div>
+            <h1>基础资料</h1>
+            <p>集中维护权利人、人员、代理机构与项目 / 产品；人员与系统登录用户共用同一份数据。</p>
+          </div>
+          <div class="head-actions">
+            <button class="button primary" id="createBtn">＋ 新建权利人</button>
+          </div>
+        </div>
+
+        <section class="master-panel" aria-label="基础资料列表">
+          <div class="tabs" id="tabs" role="tablist">
+            <button class="tab-button active" data-tab="parties" role="tab">权利人 <span class="tab-count">4</span></button>
+            <button class="tab-button" data-tab="persons" role="tab">人员 <span class="tab-count">5</span></button>
+            <button class="tab-button" data-tab="agencies" role="tab">代理机构 <span class="tab-count">4</span></button>
+            <button class="tab-button" data-tab="projects" role="tab">项目 / 产品 <span class="tab-count">4</span></button>
+          </div>
+          <div id="syncNote"></div>
+          <div class="toolbar master-toolbar">
+            <div class="filters">
+              <input class="field search" id="searchInput" placeholder="搜索名称、联系人或编号" aria-label="搜索" />
+              <select class="field" id="filterPrimary" aria-label="筛选条件一"></select>
+              <select class="field" id="filterSecondary" aria-label="筛选条件二"></select>
+            </div>
+            <div class="toolbar-right">
+              <span class="result-count" id="resultCount">共 4 条</span>
+            </div>
+          </div>
+          <div class="table-panel">
+            <table class="data-table">
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span id="pageSummary">共 4 条，每页 20 条</span>
+            <div class="pages"><button class="page-btn active">1</button></div>
+          </div>
+        </section>
+
+        <p class="proto-note"><b>原型说明：</b>本方案移除部门页签与所属部门字段；人员与系统用户合并展示。两项均涉及数据权限与历史数据，开发前需确认。</p>
+      </main>
+    </div>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+  <aside class="drawer" id="drawer" aria-hidden="true" aria-labelledby="drawerTitle">
+    <header>
+      <div><small id="drawerEyebrow">基础资料 · 权利人</small><h2 id="drawerTitle">新建权利人</h2></div>
+      <button class="icon-button" id="drawerClose" aria-label="关闭">×</button>
+    </header>
+    <div class="drawer-body" id="drawerBody"></div>
+    <footer>
+      <button class="button ghost" id="drawerCancel">取消</button>
+      <button class="button primary" id="drawerSubmit">保存</button>
+    </footer>
+  </aside>
+
+  <div class="modal-backdrop" id="deleteBackdrop" hidden></div>
+  <section class="modal delete-modal" id="deleteModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="deleteTitle">
+    <header>
+      <div><small>删除确认</small><h2 id="deleteTitle">删除记录？</h2></div>
+      <button class="icon-button" id="deleteClose" aria-label="关闭">×</button>
+    </header>
+    <div class="modal-body">
+      <p class="delete-copy" id="deleteCopy"></p>
+      <p class="delete-hint">删除为逻辑删除：记录不再出现在选择列表和列表中，历史关联与审计记录保留。</p>
+    </div>
+    <footer>
+      <button class="button ghost" id="deleteCancel">取消</button>
+      <button class="button danger" id="deleteConfirm">确认删除</button>
+    </footer>
+  </section>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <script>
+    const TAB_META = {
+      parties: {
+        label: '权利人',
+        mark: '权',
+        createLabel: '＋ 新建权利人',
+        columns: ['名称', '类型', '国家 / 地区', '联系人', '联系方式', '关联档案', '状态', '操作'],
+        filters: [['全部类型', '企业', '个人'], ['全部地区', '中国', '美国']],
+        searchHint: '搜索名称、联系人或证件号'
+      },
+      persons: {
+        label: '人员',
+        mark: '人',
+        createLabel: '＋ 新建用户',
+        columns: ['姓名', '登录账号', '角色', '手机', '邮箱', '状态', '操作'],
+        filters: [['全部角色', '管理员', '知识产权管理员', '只读用户'], ['全部状态', '启用', '停用']],
+        searchHint: '搜索姓名或登录账号'
+      },
+      agencies: {
+        label: '代理机构',
+        mark: '代',
+        createLabel: '＋ 新建代理机构',
+        columns: ['机构名称', '服务类型', '联系人', '电话', '邮箱', '关联档案', '状态', '操作'],
+        filters: [['全部服务类型', '专利代理', '商标代理', '版权登记', '涉外代理'], ['全部状态', '启用', '停用']],
+        searchHint: '搜索机构名称或联系人'
+      },
+      projects: {
+        label: '项目 / 产品',
+        mark: '项',
+        createLabel: '＋ 新建项目 / 产品',
+        columns: ['名称', '编号', '负责人', '开始日期', '状态', '关联档案', '操作'],
+        filters: [['全部状态', '进行中', '规划中', '已结项'], ['全部负责人', '周雨桐', '陈启航', '沈嘉禾', '唐明月']],
+        searchHint: '搜索名称或编号'
+      }
+    };
+
+    const records = {
+      parties: [
+        { id: 'PTY-001', name: '示例科技有限公司', type: '企业', region: '中国', contact: '演示联系人甲', phone: '138****0001', email: 'contact@example-demo.cn', count: 128, status: '启用' },
+        { id: 'PTY-002', name: '演示联合申请人', type: '企业', region: '中国', contact: '示例用户甲', phone: '138****0002', email: 'joint@example-demo.cn', count: 12, status: '启用' },
+        { id: 'PTY-003', name: '示例个人权利人', type: '个人', region: '中国', contact: '示例用户乙', phone: '138****0003', email: 'person@example-demo.cn', count: 3, status: '启用' },
+        { id: 'PTY-004', name: '海外合作方（示例）', type: '企业', region: '美国', contact: 'Emily Demo', phone: '+1 202 **** 0100', email: 'demo@example.com', count: 1, status: '停用' }
+      ],
+      persons: [
+        { id: 'USR-001', name: '林知远', username: 'lin.zhiyuan', role: '管理员', phone: '138****0001', email: 'lin.zhiyuan@example-demo.cn', status: '启用', current: true },
+        { id: 'USR-002', name: '周雨桐', username: 'zhou.yutong', role: '知识产权管理员', phone: '138****0002', email: 'zhou.yutong@example-demo.cn', status: '启用' },
+        { id: 'USR-003', name: '陈启航', username: 'chen.qihang', role: '知识产权管理员', phone: '138****0003', email: 'chen.qihang@example-demo.cn', status: '启用' },
+        { id: 'USR-004', name: '沈嘉禾', username: 'shen.jiahe', role: '只读用户', phone: '138****0004', email: 'shen.jiahe@example-demo.cn', status: '启用' },
+        { id: 'USR-005', name: '唐明月', username: 'tang.mingyue', role: '只读用户', phone: '138****0005', email: 'tang.mingyue@example-demo.cn', status: '停用' }
+      ],
+      agencies: [
+        { id: 'AGY-001', name: '示例专利代理事务所', service: '专利代理', contact: '张代理', phone: '010-****0001', email: 'patent@example-demo.cn', count: 33, status: '启用' },
+        { id: 'AGY-002', name: '示例版权服务中心', service: '版权登记', contact: '李顾问', phone: '010-****0002', email: 'copyright@example-demo.cn', count: 18, status: '启用' },
+        { id: 'AGY-003', name: '示例商标代理有限公司', service: '商标代理', contact: '王顾问', phone: '021-****0003', email: 'tm@example-demo.cn', count: 9, status: '启用' },
+        { id: 'AGY-004', name: '海外知识产权服务商（示例）', service: '涉外代理', contact: 'Emily Demo', phone: '+1 202 **** 0100', email: 'global@example.com', count: 2, status: '停用' }
+      ],
+      projects: [
+        { id: 'PRJ-001', name: '智能运维平台 V2.0', code: 'PRJ-DEMO-001', owner: '周雨桐', start: '2025-01-08', status: '进行中', count: 23 },
+        { id: 'PRJ-002', name: '模块化传感终端', code: 'PRJ-DEMO-002', owner: '陈启航', start: '2024-03-12', status: '进行中', count: 11 },
+        { id: 'PRJ-003', name: '品牌升级计划（示例）', code: 'PRJ-DEMO-003', owner: '唐明月', start: '2026-02-01', status: '规划中', count: 4 },
+        { id: 'PRJ-004', name: '知识资产分析产品', code: 'PRJ-DEMO-004', owner: '沈嘉禾', start: '2025-06-20', status: '已结项', count: 7 }
+      ]
+    };
+
+    let activeTab = new URLSearchParams(location.search).get('tab');
+    if (!TAB_META[activeTab]) activeTab = 'parties';
+    let keyword = '';
+    let filterOne = '';
+    let filterTwo = '';
+
+    const tabsEl = document.getElementById('tabs');
+    const tableHead = document.getElementById('tableHead');
+    const tableBody = document.getElementById('tableBody');
+    const searchInput = document.getElementById('searchInput');
+    const filterPrimary = document.getElementById('filterPrimary');
+    const filterSecondary = document.getElementById('filterSecondary');
+    const resultCount = document.getElementById('resultCount');
+    const pageSummary = document.getElementById('pageSummary');
+    const createBtn = document.getElementById('createBtn');
+    const syncNote = document.getElementById('syncNote');
+    const drawer = document.getElementById('drawer');
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const drawerBody = document.getElementById('drawerBody');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const drawerEyebrow = document.getElementById('drawerEyebrow');
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteBackdrop = document.getElementById('deleteBackdrop');
+    const deleteTitle = document.getElementById('deleteTitle');
+    const deleteCopy = document.getElementById('deleteCopy');
+    let pendingDelete = null;
+
+    function badge(text) {
+      if (text === '启用' || text === '已结项') return `<span class="badge green">${text}</span>`;
+      if (text === '停用') return `<span class="badge gray">${text}</span>`;
+      if (text === '规划中') return `<span class="badge amber">${text}</span>`;
+      return `<span class="badge">${text}</span>`;
+    }
+
+    function cellName(mark, name, id) {
+      return `<div class="name-cell"><span class="type-mark">${mark}</span><div><strong>${name}</strong><small>${id}</small></div></div>`;
+    }
+
+    function rowActions(id, name, options = {}) {
+      const deleteButton = options.noDelete
+        ? '<button class="action-btn" disabled title="不能删除当前登录账号">删除</button>'
+        : `<button class="action-btn danger" data-delete="${id}">删除</button>`;
+      return `<div class="row-actions"><button class="action-btn" data-edit="${id}">编辑</button>${deleteButton}</div>`;
+    }
+
+    function partyRow(item) {
+      return `<tr>
+        <td>${cellName('权', item.name, item.id)}</td>
+        <td>${item.type}</td>
+        <td>${item.region}</td>
+        <td>${item.contact}</td>
+        <td><div>${item.phone}</div><div style="font-size:10px;color:var(--muted);margin-top:3px">${item.email}</div></td>
+        <td>${item.count}</td>
+        <td>${badge(item.status)}</td>
+        <td>${rowActions(item.id, item.name)}</td>
+      </tr>`;
+    }
+
+    function personRow(item) {
+      const name = item.current ? `${item.name} <span class="badge" style="height:18px;margin-left:4px">本人</span>` : item.name;
+      return `<tr>
+        <td>${cellName('人', name, item.id)}</td>
+        <td><span class="badge gray">${item.username}</span></td>
+        <td>${item.role}</td>
+        <td>${item.phone}</td>
+        <td>${item.email}</td>
+        <td>${badge(item.status)}</td>
+        <td>${rowActions(item.id, item.name, { noDelete: item.current })}</td>
+      </tr>`;
+    }
+
+    function agencyRow(item) {
+      return `<tr>
+        <td>${cellName('代', item.name, item.id)}</td>
+        <td>${item.service}</td>
+        <td>${item.contact}</td>
+        <td>${item.phone}</td>
+        <td>${item.email}</td>
+        <td>${item.count}</td>
+        <td>${badge(item.status)}</td>
+        <td>${rowActions(item.id, item.name)}</td>
+      </tr>`;
+    }
+
+    function projectRow(item) {
+      return `<tr>
+        <td>${cellName('项', item.name, item.id)}</td>
+        <td>${item.code}</td>
+        <td>${item.owner}</td>
+        <td>${item.start}</td>
+        <td>${badge(item.status)}</td>
+        <td>${item.count}</td>
+        <td>${rowActions(item.id, item.name)}</td>
+      </tr>`;
+    }
+
+    const rowRenderers = { parties: partyRow, persons: personRow, agencies: agencyRow, projects: projectRow };
+
+    const filterKeys = {
+      parties: ['type', 'region'],
+      persons: ['role', 'status'],
+      agencies: ['service', 'status'],
+      projects: ['status', 'owner']
+    };
+
+    function matches(item) {
+      if (keyword) {
+        const haystack = Object.values(item).join(' ').toLowerCase();
+        if (!haystack.includes(keyword.toLowerCase())) return false;
+      }
+      const [firstKey, secondKey] = filterKeys[activeTab];
+      if (filterOne && String(item[firstKey]) !== filterOne) return false;
+      if (filterTwo && String(item[secondKey]) !== filterTwo) return false;
+      return true;
+    }
+
+    function renderFilters(meta) {
+      filterPrimary.innerHTML = meta.filters[0].map((value, index) => `<option value="${index === 0 ? '' : value}">${value}</option>`).join('');
+      filterSecondary.innerHTML = meta.filters[1].map((value, index) => `<option value="${index === 0 ? '' : value}">${value}</option>`).join('');
+      filterOne = '';
+      filterTwo = '';
+    }
+
+    function renderSyncNote() {
+      if (activeTab !== 'persons') {
+        syncNote.innerHTML = '';
+        return;
+      }
+      syncNote.innerHTML = `
+        <div class="sync-note">
+          <span class="sync-icon">⇄</span>
+          <div>
+            <strong>人员与系统用户为同一份数据</strong>
+            <span>姓名、手机、邮箱可在此维护；登录账号、角色与密码仍由「系统管理 → 用户」统一管理。</span>
+          </div>
+          <button class="link-button" id="goSystem">前往系统管理 →</button>
+        </div>`;
+      document.getElementById('goSystem').addEventListener('click', () => toast('原型演示：将跳转至系统管理 → 用户'));
+    }
+
+    function render() {
+      const meta = TAB_META[activeTab];
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.toggle('active', button.dataset.tab === activeTab);
+      });
+      createBtn.textContent = meta.createLabel;
+      searchInput.placeholder = meta.searchHint;
+      tableHead.innerHTML = `<tr>${meta.columns.map(column => `<th>${column}</th>`).join('')}</tr>`;
+      renderSyncNote();
+
+      const rows = records[activeTab].filter(item => matches(item));
+      tableBody.innerHTML = rows.length
+        ? rows.map(rowRenderers[activeTab]).join('')
+        : `<tr class="empty-row"><td colspan="${meta.columns.length}"><b style="display:block;font-size:28px;color:#b4c3da;margin-bottom:8px">⌕</b>没有匹配的记录</td></tr>`;
+      resultCount.textContent = `共 ${rows.length} 条`;
+      pageSummary.textContent = `共 ${rows.length} 条，每页 20 条`;
+    }
+
+    function activateTab(tab) {
+      if (!TAB_META[tab] || tab === activeTab) return;
+      activeTab = tab;
+      keyword = '';
+      searchInput.value = '';
+      renderFilters(TAB_META[tab]);
+      render();
+    }
+
+    tabsEl.addEventListener('click', event => {
+      const button = event.target.closest('.tab-button');
+      if (button) activateTab(button.dataset.tab);
+    });
+
+    searchInput.addEventListener('input', event => {
+      keyword = event.target.value.trim();
+      render();
+    });
+
+    filterPrimary.addEventListener('change', event => {
+      filterOne = event.target.value;
+      filterSecondary.value = '';
+      filterTwo = '';
+      render();
+    });
+
+    filterSecondary.addEventListener('change', event => {
+      filterTwo = event.target.value;
+      render();
+    });
+
+    const formTemplates = {
+      parties: `
+        <div class="form-grid">
+          <div class="form-group full"><label>名称 *</label><input name="name" placeholder="请输入权利人名称" /></div>
+          <div class="form-group"><label>权利人类型 *</label><select name="type"><option>企业</option><option>个人</option><option>其他</option></select></div>
+          <div class="form-group"><label>证件号 / 统一社会信用代码</label><input name="idNumber" placeholder="可选" /></div>
+          <div class="form-group"><label>国家 / 地区</label><input name="region" placeholder="例如：中国" /></div>
+          <div class="form-group"><label>联系人</label><input name="contact" placeholder="可选" /></div>
+          <div class="form-group"><label>电话</label><input name="phone" placeholder="可选" /></div>
+          <div class="form-group"><label>邮箱</label><input name="email" placeholder="可选" /></div>
+          <div class="form-group full"><label>地址</label><input name="address" placeholder="可选" /></div>
+          <div class="form-group full"><label>备注</label><textarea name="remark" placeholder="可选"></textarea></div>
+          <div class="form-group full"><label class="checkbox-row"><input type="checkbox" name="isDefault" /> 设为默认权利人</label></div>
+        </div>`,
+      persons: `
+        <div class="form-grid">
+          <div class="form-group"><label>姓名 *</label><input name="name" placeholder="请输入姓名" /></div>
+          <div class="form-group"><label>登录账号 *</label><input name="username" placeholder="用于登录系统" /></div>
+          <div class="form-group"><label>角色 *</label><select name="role"><option>知识产权管理员</option><option>只读用户</option><option>管理员</option></select></div>
+          <div class="form-group"><label>状态</label><select name="status"><option>启用</option><option>停用</option></select></div>
+          <div class="form-group"><label>手机</label><input name="phone" placeholder="可选" /></div>
+          <div class="form-group"><label>邮箱</label><input name="email" placeholder="可选" /></div>
+          <div class="form-group full"><label>初始密码 *</label><input name="password" type="password" placeholder="仅新建时填写" /></div>
+          <div class="form-note">人员即系统用户。新建后可直接登录系统；编辑时登录账号与角色不可在此修改，请前往「系统管理 → 用户」。</div>
+        </div>`,
+      agencies: `
+        <div class="form-grid">
+          <div class="form-group full"><label>机构名称 *</label><input name="name" placeholder="请输入代理机构名称" /></div>
+          <div class="form-group"><label>服务类型 *</label><select name="service"><option>专利代理</option><option>商标代理</option><option>版权登记</option><option>涉外代理</option><option>其他</option></select></div>
+          <div class="form-group"><label>联系人</label><input name="contact" placeholder="可选" /></div>
+          <div class="form-group"><label>电话</label><input name="phone" placeholder="可选" /></div>
+          <div class="form-group"><label>邮箱</label><input name="email" placeholder="可选" /></div>
+          <div class="form-group full"><label>地址</label><input name="address" placeholder="可选" /></div>
+          <div class="form-group full"><label>备注</label><textarea name="remark" placeholder="可选"></textarea></div>
+        </div>`,
+      projects: `
+        <div class="form-grid">
+          <div class="form-group full"><label>项目 / 产品名称 *</label><input name="name" placeholder="请输入名称" /></div>
+          <div class="form-group"><label>编号</label><input name="code" placeholder="可选" /></div>
+          <div class="form-group"><label>负责人</label><select name="owner"><option>周雨桐</option><option>陈启航</option><option>沈嘉禾</option><option>唐明月</option></select></div>
+          <div class="form-group"><label>开始日期</label><input name="start" type="date" /></div>
+          <div class="form-group"><label>状态</label><select name="status"><option>进行中</option><option>规划中</option><option>已结项</option></select></div>
+          <div class="form-group full"><label>备注</label><textarea name="remark" placeholder="可选"></textarea></div>
+        </div>`
+    };
+
+    let drawerMode = 'create';
+    let editingId = null;
+
+    function openDrawer(mode, id) {
+      const meta = TAB_META[activeTab];
+      drawerMode = mode;
+      editingId = id || null;
+      drawerEyebrow.textContent = `基础资料 · ${meta.label}`;
+      drawerTitle.textContent = `${mode === 'create' ? '新建' : '编辑'}${meta.label}`;
+      drawerBody.innerHTML = formTemplates[activeTab];
+      const record = id ? records[activeTab].find(item => item.id === id) : null;
+      const form = drawerBody;
+      if (record) {
+        form.querySelectorAll('[name]').forEach(field => {
+          const key = field.name;
+          if (key === 'type' || key === 'status' || key === 'role' || key === 'service' || key === 'owner') {
+            if (record[key]) field.value = record[key];
+          } else if (record[key] !== undefined) {
+            field.value = record[key];
+          }
+        });
+        if (activeTab === 'persons') {
+          form.querySelector('[name="username"]').disabled = true;
+          form.querySelector('[name="role"]').disabled = true;
+          const password = form.querySelector('[name="password"]');
+          if (password) {
+            password.disabled = true;
+            password.placeholder = '如需重置密码，请前往系统管理';
+            password.closest('.form-group').style.display = 'none';
+          }
+          form.querySelector('.form-note').textContent = '人员即系统用户。此处修改姓名、手机、邮箱和状态，会同步到系统管理中的用户资料。';
+        }
+      }
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      drawerBackdrop.hidden = false;
+      const firstInput = drawerBody.querySelector('input:not([disabled]), select:not([disabled])');
+      if (firstInput) firstInput.focus();
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      drawerBackdrop.hidden = true;
+    }
+
+    function openDelete(id) {
+      const item = records[activeTab].find(record => record.id === id);
+      if (!item) return;
+      if (activeTab === 'persons' && item.current) {
+        toast('当前登录账号不可删除');
+        return;
+      }
+      pendingDelete = { tab: activeTab, id };
+      deleteTitle.textContent = `删除${TAB_META[activeTab].label}？`;
+      const reason = {
+        parties: '删除后将从权利人选择列表中移除；已关联的知识产权档案会保留历史名称，不会被删除。',
+        persons: '删除后该用户将无法登录系统；其创建或处理过的历史记录会保留。',
+        agencies: '删除后将从代理机构选择列表中移除；已关联档案会保留历史记录。',
+        projects: '删除后将从项目 / 产品选择列表中移除；已关联档案不会被删除。'
+      }[activeTab];
+      deleteCopy.innerHTML = `确定删除「<strong>${item.name}</strong>」吗？<br />${reason}`;
+      deleteModal.classList.add('open');
+      deleteModal.setAttribute('aria-hidden', 'false');
+      deleteBackdrop.hidden = false;
+    }
+
+    function closeDelete() {
+      deleteModal.classList.remove('open');
+      deleteModal.setAttribute('aria-hidden', 'true');
+      deleteBackdrop.hidden = true;
+      pendingDelete = null;
+    }
+
+    function toast(message) {
+      const stack = document.getElementById('toastStack');
+      const el = document.createElement('div');
+      el.className = 'toast success';
+      el.textContent = message;
+      stack.appendChild(el);
+      setTimeout(() => el.remove(), 2600);
+    }
+
+    document.getElementById('createBtn').addEventListener('click', () => openDrawer('create'));
+    document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+    document.getElementById('drawerCancel').addEventListener('click', closeDrawer);
+    drawerBackdrop.addEventListener('click', closeDrawer);
+    document.getElementById('drawerSubmit').addEventListener('click', () => {
+      closeDrawer();
+      toast(`原型演示：${drawerMode === 'create' ? '新建' : '编辑'}已保存（不会持久化）`);
+    });
+    document.getElementById('deleteClose').addEventListener('click', closeDelete);
+    document.getElementById('deleteCancel').addEventListener('click', closeDelete);
+    deleteBackdrop.addEventListener('click', closeDelete);
+    tableBody.addEventListener('click', event => {
+      const edit = event.target.closest('[data-edit]');
+      if (edit) {
+        openDrawer('edit', edit.dataset.edit);
+        return;
+      }
+      const remove = event.target.closest('[data-delete]');
+      if (remove) openDelete(remove.dataset.delete);
+    });
+    document.getElementById('deleteConfirm').addEventListener('click', () => {
+      if (!pendingDelete) return;
+      const list = records[pendingDelete.tab];
+      const index = list.findIndex(item => item.id === pendingDelete.id);
+      if (index >= 0) list.splice(index, 1);
+      const label = TAB_META[pendingDelete.tab].label;
+      closeDelete();
+      render();
+      toast(`原型演示：已删除${label}（不会持久化）`);
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        closeDrawer();
+        closeDelete();
+      }
+    });
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', () => activateTab(button.dataset.tab));
+    });
+
+    renderFilters(TAB_META[activeTab]);
+    render();
+
+    const previewDrawer = new URLSearchParams(location.search).get('drawer');
+    if (previewDrawer === 'create') {
+      setTimeout(() => openDrawer('create'), 60);
+    } else if (previewDrawer === 'edit') {
+      const previewId = new URLSearchParams(location.search).get('id');
+      if (records[activeTab].some(item => item.id === previewId)) {
+        setTimeout(() => openDrawer('edit', previewId), 60);
+      }
+    }
+  </script>
+</body>
+</html>

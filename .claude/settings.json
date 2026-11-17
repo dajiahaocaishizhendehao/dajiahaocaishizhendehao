@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(perl -0pi -e \"s/\\\\\\\\\\\\\\\\n\\\\\\\\\\\\\\\\n'$/\\\\\\\\\\\\\\\\n'/\" frontend/src/components/ImportDialog.vue)",
+      "Bash(python -m pytest tests/test_domain.py tests/test_admin.py tests/test_import_xlsx.py -q)",
+      "Bash(python -c \"import fastapi, sqlalchemy; print\\('deps ok'\\)\")",
+      "Bash(cd \"d:/DS-workSpace\" && find . -maxdepth 4 -type d \\\\\\( -name \"site-packages\" -o -name \".venv\" -o -name \"venv\" \\\\\\) 2>/dev/null | head -20)",
+      "Read(//d/DS-workSpace/**)",
+      "Bash(./.venv/Scripts/python.exe -m pytest tests/test_domain.py tests/test_admin.py tests/test_import_xlsx.py -q)"
+    ]
+  }
+}

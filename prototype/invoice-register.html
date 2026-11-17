@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>登记发票 · 原型</title>
+<style>
+  :root{--blue:#2563eb;--ink:#172033;--muted:#5f6b80;--line:#e5eaf2;--green:#12a66a;--amber:#d97706;--red:#dc5562;--panel:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;background:#0b1d3a;color:var(--ink)}
+  .stage{min-height:100vh;display:grid;place-items:center;padding:20px}
+  .modal{width:1200px;max-width:100%;height:800px;background:var(--panel);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden}
+  header{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 22px;border-bottom:1px solid var(--line)}
+  header h1{font-size:18px;margin:0 0 6px}
+  .meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:12px;font-size:11px;background:#eef3ff;color:#2e68c5}
+  .pill.green{background:#e8f7f1;color:#16865a}
+  .pill.amber{background:#fff5df;color:#b97511}
+  .pill.gray{background:#eff2f5;color:#687386}
+  .close{border:0;background:transparent;font-size:20px;color:var(--muted);cursor:pointer}
+  .body{display:grid;grid-template-columns:430px 1fr;flex:1;min-height:0}
+
+  /* 左侧发票预览 */
+  .preview{border-right:1px solid var(--line);background:#eef2f7;display:flex;flex-direction:column;min-height:0}
+  .bar{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fff;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+  .bar .spacer{flex:1}
+  .iconbtn{width:26px;height:26px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;color:#475269}
+  .sheetbox{flex:1;overflow:auto;padding:16px;display:grid;place-items:start center}
+  .sheet{width:340px;background:#fff;box-shadow:0 6px 24px rgba(25,45,76,.16);padding:18px;position:relative;font-size:9px;color:#8b95a6}
+  .sheet:before{content:"示例发票";position:absolute;inset:0;display:grid;place-items:center;font-size:38px;color:rgba(37,99,235,.07);transform:rotate(-24deg);font-weight:700;pointer-events:none}
+  .sheet h3{text-align:center;font-size:12px;color:#c0392b;margin:0 0 10px;letter-spacing:2px}
+  .kv{display:flex;justify-content:space-between;margin:3px 0}
+  .tbl{width:100%;border-collapse:collapse;margin:8px 0;font-size:8px}
+  .tbl th,.tbl td{border:1px solid #e6eaf0;padding:3px 4px;text-align:left}
+  .sheet .total{text-align:right;margin-top:6px;color:#4b5568}
+  .ocr{margin-top:8px;border-top:1px solid var(--line);background:#fff}
+  .ocr summary{padding:9px 12px;font-size:12px;color:var(--blue);cursor:pointer}
+  .ocr pre{margin:0;padding:0 12px 12px;font-size:11px;color:var(--muted);white-space:pre-wrap;max-height:90px;overflow:auto}
+
+  /* 右侧表单 */
+  .form{display:flex;flex-direction:column;min-height:0}
+  .warn{margin:12px 20px 0;background:#fff9ec;border:1px solid #fae4b7;border-radius:10px;padding:9px 12px;font-size:12px;color:#8b6b36}
+  .scroll{flex:1;overflow:auto;padding:14px 20px 0}
+  .section{margin-bottom:16px}
+  .section h4{margin:0 0 10px;font-size:13px;color:#475269;display:flex;align-items:center;gap:8px}
+  .section h4 .line{flex:1;height:1px;background:var(--line)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .field-item{display:grid;gap:5px}
+  .field-item label{font-size:11px;color:var(--muted)}
+  input[type="text"],input[type="date"]{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;font-size:13px;color:var(--ink)}
+  input:focus{outline:none;border-color:#7aa2ef;box-shadow:0 0 0 3px #edf3ff}
+  .case-chip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fbfcfe;font-size:13px}
+  .case-chip .docket{color:var(--muted);font-size:11px}
+  .case-chip .spacer{flex:1}
+  .case-chip button{border:0;background:transparent;color:var(--blue);font-size:12px;cursor:pointer}
+  .hint{font-size:11px;color:var(--muted)}
+  .fee-list{border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .fee-row{display:grid;grid-template-columns:24px 90px 1fr 110px;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid #f0f2f6;font-size:12px}
+  .fee-row:last-child{border-bottom:0}
+  .fee-row:hover{background:#f8fbff}
+  .fee-row .amount{text-align:right;font-variant-numeric:tabular-nums}
+  .fee-foot{display:flex;justify-content:space-between;padding:9px 12px;background:#fbfcfe;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  .balance{display:flex;gap:10px;align-items:center;margin-top:8px;font-size:12px}
+  .attach{display:flex;align-items:center;gap:10px;border:1px dashed #9eb7df;background:#f8fbff;border-radius:9px;padding:10px 12px;font-size:12px}
+  .attach .spacer{flex:1}
+  footer{display:flex;align-items:center;gap:10px;padding:13px 20px;border-top:1px solid var(--line);background:#fff}
+  footer .summary{font-size:12px;color:var(--muted)}
+  footer .summary b{color:var(--ink)}
+  footer .spacer{flex:1}
+  .btn{height:36px;padding:0 15px;border-radius:9px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;color:#344054}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 6px 15px rgba(37,99,235,.22)}
+  .btn.small{height:30px;padding:0 10px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="stage">
+  <section class="modal" aria-label="登记发票">
+    <header>
+      <div>
+        <h1>登记发票</h1>
+        <div class="meta">
+          <span class="pill green">已识别 6 项 · PDF 文本层</span>
+          <span class="pill gray">附件已保存：invoice-20261012.pdf</span>
+          <span class="pill amber">1 项需人工核对</span>
+        </div>
+      </div>
+      <button class="close" title="关闭">×</button>
+    </header>
+
+    <div class="body">
+      <!-- 左：发票预览 -->
+      <aside class="preview">
+        <div class="bar">
+          <button class="iconbtn" title="缩小">−</button>
+          <span>100%</span>
+          <button class="iconbtn" title="放大">+</button>
+          <span class="spacer"></span>
+          <button class="btn small" id="reRecognize">重新识别</button>
+          <button class="iconbtn" title="在新标签打开">⤢</button>
+        </div>
+        <div class="sheetbox">
+          <div class="sheet">
+            <h3>电子发票（增值税专用发票）</h3>
+            <div class="kv"><span>发票代码</span><span>011002300111</span></div>
+            <div class="kv"><span>发票号码</span><span>26312000000999888</span></div>
+            <div class="kv"><span>开票日期</span><span>2026年10月12日</span></div>
+            <div class="kv"><span>购买方</span><span>思腾合力（天津）科技有限公司</span></div>
+            <div class="kv"><span>销售方</span><span>北京示例知识产权代理有限公司</span></div>
+            <table class="tbl">
+              <tr><th>项目名称</th><th>金额</th><th>税率</th><th>税额</th></tr>
+              <tr><td>*鉴证咨询服务*专利代理费</td><td>943.40</td><td>6%</td><td>56.60</td></tr>
+            </table>
+            <div class="total">合计 ¥943.40　税额 ¥56.60</div>
+            <div class="total">价税合计（小写）¥1,000.00</div>
+          </div>
+        </div>
+        <details class="ocr">
+          <summary>查看识别原文</summary>
+          <pre>电子发票（增值税专用发票）
+发票代码：011002300111
+发票号码：26312000000999888
+开票日期：2026年10月12日
+…</pre>
+        </details>
+      </aside>
+
+      <!-- 右：表单 -->
+      <div class="form">
+        <div class="warn">发票税额 56.60 与「含税金额 − 不含税金额」一致；请确认关联费用与发票金额是否对应。</div>
+
+        <div class="scroll">
+          <div class="section">
+            <h4>归属案件<span class="line"></span></h4>
+            <div class="case-chip">
+              <span>基于图像的车辆重识别方法、装置、服务器及存储介质</span>
+              <span class="docket">2026011900256000</span>
+              <span class="spacer"></span>
+              <button>更换</button>
+            </div>
+            <p class="hint" style="margin:6px 0 0">发票必须归属一个案件，才能按专利检索到付款凭证。</p>
+          </div>
+
+          <div class="section">
+            <h4>票面信息<span class="line"></span></h4>
+            <div class="grid2">
+              <div class="field-item"><label>发票号码 *</label><input type="text" value="26312000000999888" /></div>
+              <div class="field-item"><label>发票代码</label><input type="text" value="011002300111" /></div>
+              <div class="field-item"><label>开票日期</label><input type="date" value="2026-10-12" /></div>
+              <div class="field-item"><label>开票单位</label><input type="text" value="北京示例知识产权代理有限公司" /></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h4>金额<span class="line"></span>
+              <span class="pill green" id="balancePill">勾稽一致</span>
+            </h4>
+            <div class="grid3">
+              <div class="field-item"><label>不含税金额</label><input type="text" id="net" value="943.40" /></div>
+              <div class="field-item"><label>税额</label><input type="text" id="tax" value="56.60" /></div>
+              <div class="field-item"><label>价税合计</label><input type="text" id="gross" value="1000.00" /></div>
+            </div>
+            <div class="balance">
+              <span class="hint">不含税 + 税额 = <b id="calc">1000.00</b>；与价税合计 <span id="diff">相差 0.00</span></span>
+            </div>
+          </div>
+
+          <div class="section">
+            <h4>关联费用（该案件共 3 笔）<span class="line"></span></h4>
+            <div class="fee-list">
+              <label class="fee-row">
+                <input type="checkbox" class="fee" value="800" checked />
+                <span>代理费</span>
+                <span class="hint">2026-09-20 · 已支付</span>
+                <span class="amount">¥800.00</span>
+              </label>
+              <label class="fee-row">
+                <input type="checkbox" class="fee" value="150" checked />
+                <span>申请费</span>
+                <span class="hint">2026-09-20 · 已支付</span>
+                <span class="amount">¥150.00</span>
+              </label>
+              <label class="fee-row">
+                <input type="checkbox" class="fee" value="50" />
+                <span>材料费</span>
+                <span class="hint">2026-10-01 · 未支付</span>
+                <span class="amount">¥50.00</span>
+              </label>
+              <div class="fee-foot">
+                <span>已选 <b id="feeCount">2</b> 笔</span>
+                <span>小计 <b id="feeSum">¥950.00</b></span>
+              </div>
+            </div>
+            <p class="hint" style="margin:6px 0 0" id="feeHint">所选费用小计 950.00 与发票价税合计 1000.00 相差 50.00，请确认。</p>
+          </div>
+
+          <div class="section">
+            <h4>附件<span class="line"></span></h4>
+            <div class="attach">
+              <span>📄 invoice-20261012.pdf</span>
+              <span class="spacer"></span>
+              <button class="btn small">下载</button>
+              <button class="btn small">替换</button>
+            </div>
+          </div>
+        </div>
+
+        <footer>
+          <span class="summary">将保存 <b>1</b> 张发票，关联 <b id="footCount">2</b> 笔费用，合计 <b id="footSum">¥950.00</b></span>
+          <span class="spacer"></span>
+          <button class="btn">取消</button>
+          <button class="btn primary" id="save">保存发票</button>
+        </footer>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  const money = (v) => {
+    const n = parseFloat(String(v).replace(/[,¥\s]/g, ''))
+    return Number.isFinite(n) ? n : 0
+  }
+  const fmt = (n) => n.toFixed(2)
+
+  function refreshAmounts() {
+    const net = money(document.getElementById('net').value)
+    const tax = money(document.getElementById('tax').value)
+    const gross = money(document.getElementById('gross').value)
+    const calc = net + tax
+    const diff = gross - calc
+    document.getElementById('calc').textContent = fmt(calc)
+    document.getElementById('diff').textContent = `相差 ${fmt(Math.abs(diff))}`
+    const pill = document.getElementById('balancePill')
+    if (Math.abs(diff) <= 0.01) {
+      pill.textContent = '勾稽一致'
+      pill.className = 'pill green'
+    } else {
+      pill.textContent = '金额不一致'
+      pill.className = 'pill amber'
+    }
+  }
+
+  function refreshFees() {
+    const boxes = [...document.querySelectorAll('.fee')]
+    const chosen = boxes.filter((b) => b.checked)
+    const sum = chosen.reduce((acc, b) => acc + money(b.value), 0)
+    document.getElementById('feeCount').textContent = String(chosen.length)
+    document.getElementById('feeSum').textContent = `¥${fmt(sum)}`
+    document.getElementById('footCount').textContent = String(chosen.length)
+    document.getElementById('footSum').textContent = `¥${fmt(sum)}`
+
+    const gross = money(document.getElementById('gross').value)
+    const hint = document.getElementById('feeHint')
+    if (Math.abs(sum - gross) <= 0.01) {
+      hint.textContent = `所选费用小计 ${fmt(sum)} 与发票价税合计一致。`
+    } else {
+      hint.textContent = `所选费用小计 ${fmt(sum)} 与发票价税合计 ${fmt(gross)} 相差 ${fmt(Math.abs(gross - sum))}，请确认。`
+    }
+  }
+
+  ;['net', 'tax', 'gross'].forEach((id) => {
+    document.getElementById(id).addEventListener('input', () => {
+      refreshAmounts()
+      refreshFees()
+    })
+  })
+  document.querySelectorAll('.fee').forEach((box) => box.addEventListener('change', refreshFees))
+
+  document.getElementById('save').onclick = () => alert('原型演示：保存发票（不会写入任何数据）')
+  document.getElementById('reRecognize').onclick = () => alert('原型演示：重新识别发票附件')
+
+  refreshAmounts()
+  refreshFees()
+</script>
+</body>
+</html>
